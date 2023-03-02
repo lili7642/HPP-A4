@@ -1,0 +1,4 @@
+2,376
+1,734
+AMD Opteron Processor 6282 SE
+16
