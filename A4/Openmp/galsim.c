@@ -102,9 +102,9 @@ int main(int argc, char *argv[])  {
 
     //Opening file
     char path[100];
-    strcpy(path, "input_data/");
-    strcat(path, file);
-    //strcpy(path, file);
+    //strcpy(path, "input_data/");
+    //strcat(path, file);
+    strcpy(path, file);
     //printf("%s\n", path);
 
     FILE *stream;

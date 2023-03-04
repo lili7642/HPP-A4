@@ -3,7 +3,6 @@
 #include <string.h>
 #include <math.h>
 #include <pthread.h>
-
 #define eps 1e-3
 
 typedef struct{ //struct with all data for a particle
@@ -69,15 +68,19 @@ void update_particles(planet_data_t *arr[], planet_data_t *arrtemp[], const int 
         arrtemp[i]->vel_x = veln_x;
         arrtemp[i]->vel_y = veln_y;
     }
+}
 
-    for(int i=0; i<N; i++){ //updating each particle's vel & pos after going through all particles on a timestep
+// MAKING FUNCTION TO WRITE ARRTEMP TO ARR -----------------------
+void update_arrrays(planet_data_t *arr[], planet_data_t *arrtemp[], const int N){
+    //updating each particle's vel & pos after going through all particles on a timestep
+    for(int i=0; i<N; i++){ 
         arr[i]->pos_x = arrtemp[i]->pos_x;
         arr[i]->pos_y = arrtemp[i]->pos_y;
         arr[i]->vel_x = arrtemp[i]->vel_x;
         arr[i]->vel_y = arrtemp[i]->vel_y;
     }
-
 }
+// ---------------------------------------------------------------
 
 
 int main(int argc, char *argv[])  {
@@ -101,9 +104,9 @@ int main(int argc, char *argv[])  {
 
     //Opening file
     char path[100];
-    strcpy(path, "input_data/");
-    strcat(path, file);
-    //strcpy(path, file);
+    //strcpy(path, "input_data/");
+    //strcat(path, file);
+    strcpy(path, file);
     //printf("%s\n", path);
 
     FILE *stream;
@@ -148,10 +151,11 @@ int main(int argc, char *argv[])  {
 
     // LOCAL FUNCTION FOR PTHREAD_CREATE
     void* thread_func(void* THREAD_ID){
-        int ID = *(int*)(THREAD_ID);
-        start = (ID) * (N / N_THREADS) + 1;
-        end = start + (N/N_THREADS) - 1;
+        int ID = *(int*)(THREAD_ID);    // casting the thread ID into an integer
+        start = (ID) * (N / N_THREADS); // calculating start index
+        end = start + (N/N_THREADS);    // calculating end index
         update_particles(arr, arrtemp, N, start, end, dt);
+       // printf("\nWORK DONE BY THREAD %d\n", ID);
     }
 
 
@@ -168,9 +172,12 @@ int main(int argc, char *argv[])  {
         for (int j = 0; j < N_THREADS; j++){
             pthread_join(THREADS[j], NULL);
         }
-    }
 
-    pthread_exit(NULL);
+        // UPDATE ARRAYS
+        update_arrrays(arr, arrtemp, N);
+
+        //printf("TIME STEP DONE: %d\n ", i);
+    }
   
     //writing to result-file
     char *filename = "result.gal";
@@ -181,6 +188,8 @@ int main(int argc, char *argv[])  {
         printf("Error writing file!\n");
         return 0;
     }
+
+    
 
     for (int i = 0; i < N; i++){
         fwrite(&(arr[i]->pos_x), sizeof(double), 1, fp);
@@ -200,6 +209,8 @@ int main(int argc, char *argv[])  {
 
     free(arr);
     free(arrtemp);
+
+    pthread_exit(NULL);
     
     return 0;
 
