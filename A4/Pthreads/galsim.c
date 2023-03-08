@@ -146,14 +146,18 @@ int main(int argc, char *argv[])  {
     int* THREAD_ID[N_THREADS];
     pthread_t THREADS[N_THREADS];
 
-    int start;
-    int end;
 
     // LOCAL FUNCTION FOR PTHREAD_CREATE
     void* thread_func(void* THREAD_ID){
+        int start;
+        int end;
         int ID = *(int*)(THREAD_ID);    // casting the thread ID into an integer
-        start = (ID) * (N / N_THREADS); // calculating start index
-        end = start + (N/N_THREADS);    // calculating end index
+        start = ID * (N / N_THREADS); // calculating start index
+        if (ID == (N_THREADS-1)) { // calculating end index
+            end = N; //if we're on the last thread, it gets all that's left
+        } else{
+            end = start + (N / N_THREADS); 
+        }    
         update_particles(arr, arrtemp, N, start, end, dt);
        // printf("\nWORK DONE BY THREAD %d\n", ID);
     }
